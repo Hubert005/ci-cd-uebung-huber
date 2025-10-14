@@ -280,3 +280,7 @@ mvn -q -DskipTests=false test
 
 ## Ausblick
 - **Übung 2 (22.10.)**: GitHub Actions – Build & Tests automatisiert ausführen; SonarCloud integrieren.
+
+## Übung 1
+- Autor: Thomas Elias Huber
+- Besonderheit: Herr Huber hat bereits ein paar Erfahrungen mit Git gemacht, vor allem in den Semesterprojekten, doch er möchte sein Wissen erweitern!
