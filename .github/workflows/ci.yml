@@ -36,3 +36,7 @@ jobs:
         with:
           name: surefire-reports
           path: target/surefire-reports
+
+    concurrency:
+      group: ci-${{ github.ref }}
+      cancel-in-progress: true
