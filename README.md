@@ -1,286 +1,323 @@
-# CI/CD Übung – Java Basisprojekt (Ü1 mit Anleitungen)
+# CI Demos – GitHub Actions + Java/Maven
 
-Dieses Repository ist der Startpunkt für **Übung 1** und wird in **allen folgenden Übungen** weiterverwendet
-(CI mit GitHub Actions → SonarCloud → Docker → Security-Scan).
+This README walks you step by step from a **minimal “Hello CI” workflow** to **matrix builds (OS × Java)**.
+Each step includes **explanations** and **copy‑paste code blocks** (YAML/Bash/Java).
 
----
-
-## Voraussetzungen (VS Code)
-- **Extension Pack for Java** (Language Support, Debugger, Test Runner, Maven).
-- **JDK 17** aktiv: *Java: Configure Java Runtime*.
-- Öffne **den Projektroot** (Ordner mit `pom.xml`, nicht nur `src/`).
-- Tests ausführen: *Test Explorer* oder per Terminal:
-  ```bash
-  mvn -q -DskipTests=false test
-  ```
+## Prerequisites
+- A **GitHub repository** (push access)
+- **Git** locally
+- **Java 17** (JDK) — `java -version`
+- **Maven** — `mvn -v`
+- Optional: an editor like VS Code or IntelliJ
 
 ---
 
-## Build & Test (lokal)
+## Project layout (after Step 2)
+
+```text
+.
+├─ pom.xml
+├─ src
+│  ├─ main/java/com/example/hello/App.java
+│  └─ test/java/com/example/hello/AppTest.java
+└─ .github/workflows/ci.yml
+```
+
+---
+
+# Demo 1 — Minimal “Hello CI” workflow
+
+**Goal:** A first run that prints “Hello, CI!”.
+
+**Explanation:**
+- `on: [push, pull_request]` — runs on push & PR.
+- One job with a single step that echoes to the logs.
+
+### Instructions
+1) Create folder `.github/workflows/`  
+2) Create `ci.yml` and paste the content below  
+3) Commit & push → **Actions** tab → open the run
+
+### Copy block (YAML)
+```yaml
+# .github/workflows/ci.yml
+name: CI
+on: [push, pull_request]
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello, CI!"
+```
+
+### Copy block (Bash)
 ```bash
+mkdir -p .github/workflows
+echo "foo" >> .github/workflows/ci.yml
+git add .github/workflows/ci.yml
+git commit -m "ci: add minimal hello workflow"
+git push
+```
+
+---
+
+# Demo 2 — Add a tiny Java project
+
+**Goal:** A minimal Maven project (Java 17) + 2 unit tests.
+
+**Explanation:**
+- `pom.xml` sets Java version, JUnit 5 and Surefire (test plugin).
+- `App.java` contains tiny logic; `AppTest.java` tests it.
+- Run locally first, then push.
+
+### Copy block (pom.xml)
+```xml
+<!-- pom.xml (minimal; Java 17 + JUnit 5 + Surefire 3.x) -->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.example</groupId>
+  <artifactId>java-hello</artifactId>
+  <version>1.0.0</version>
+  <properties>
+    <maven.compiler.source>17</maven.compiler.source>
+    <maven.compiler.target>17</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <junit.jupiter.version>5.10.2</junit.jupiter.version>
+  </properties>
+  <dependencies>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.jupiter.version}</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.2.5</version>
+        <configuration>
+          <useModulePath>false</useModulePath>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
+```
+
+### Copy block (Java)
+```java
+// src/main/java/com/example/hello/App.java
+package com.example.hello;
+
+public class App {
+    public static void main(String[] args) {
+        System.out.println("Hello, Java CI!");
+    }
+    public static String greet(String name) {
+        if (name == null || name.isBlank()) return "Hello, world!";
+        return "Hello, " + name + "!";
+    }
+}
+```
+
+### Copy block (JUnit 5 tests)
+```java
+// src/test/java/com/example/hello/AppTest.java
+package com.example.hello;
+
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+class AppTest {
+    @Test void greet_default_whenNameBlank() {
+        assertEquals("Hello, world!", App.greet(""));
+    }
+    @Test void greet_personalized() {
+        assertEquals("Hello, Alice!", App.greet("Alice"));
+    }
+}
+```
+
+### Copy block (Bash — run locally & push)
+```bash
+# Run unit tests locally
 mvn -q -DskipTests=false test
-```
-Coverage-Report (für Übung 2 / SonarCloud): `target/site/jacoco/index.html`
 
----
-
-## Projektstruktur
-- `src/main/java`: `App`, `Calculator`, `TextUtils`, `NumberUtils`
-- `src/test/java`: `CalculatorTest`, `TextUtilsTest` (enthält TODOs & einen bewusst fehlschlagenden Test)
-
----
-
-## Übung 1 – Aufgaben (24 Punkte)
-
-### (1) Repository einrichten (4 P.) – **Fork & Clone / Template / ZIP**
-> Lege **dein eigenes Repo** mit dem Namen **`ci-cd-uebung-[Nachname]`** an und bringe das Starterprojekt hinein. Wähle **eine** der Varianten.
-
-**Variante A – Fork**  
-1. Öffne das Kurs-Starter-Repo (`https://github.com/mrckurz/cicd-BA-uebung01`).  
-2. Klick **Fork** → *Owner*: dein Account → *Name*: `ci-cd-uebung-[Nachname]` → Create fork.  
-3. **Deinen Fork klonen** (HTTPS oder SSH):
-   ```bash
-   # HTTPS
-   git clone https://github.com/<dein-user>/ci-cd-uebung-[Nachname].git
-   # oder SSH
-   # git clone git@github.com:<dein-user>/ci-cd-uebung-[Nachname].git
-   cd ci-cd-uebung-[Nachname]
-   ```
-4. **Upstream einrichten** (Original-Repo als Referenz):
-   ```bash
-   git remote add upstream https://github.com/<org>/<kurs-starter-repo>.git
-   git remote -v
-   # => origin = dein Fork, upstream = Kurs-Repo
-   ```
-5. **(Später) Kurs-Änderungen holen**:
-   ```bash
-   git fetch upstream
-   git switch main
-   git merge upstream/main   # oder: git rebase upstream/main
-   ```
-
-**Variante B – „Use this template“ / Import**  
-1. Im Kurs-Repo auf **Use this template** → *Owner*: dein Account → *Name*: `ci-cd-uebung-[Nachname]` → Create.  
-   *(Alternativ: GitHub → **Import repository** → URL des Kurs-Repos eintragen.)*  
-2. **Klonen**:
-   ```bash
-   git clone https://github.com/<dein-user>/ci-cd-uebung-[Nachname].git
-   cd ci-cd-uebung-[Nachname]
-   ```
-
-**Variante C – ZIP/Download in dein leeres Repo pushen**  
-1. Lege auf GitHub ein **leeres Repo** `ci-cd-uebung-[Nachname]` an.  
-2. Lade das Starterprojekt als ZIP herunter, entpacke es und initialisiere Git:
-   ```bash
-   cd <entpackter-ordner-mit-pom.xml>
-   git init
-   git add .
-   git commit -m "chore: import starter project"
-   git branch -M main
-   git remote add origin https://github.com/<dein-user>/ci-cd-uebung-[Nachname].git
-   git push -u origin main
-   ```
-
-**Erster Check lokal**  
-```bash
-mvn -v
-mvn -q -DskipTests=false test
+# Commit & push
+git add .
+git commit -m "feat: add minimal Java hello with tests"
+git push
 ```
 
 ---
 
-### (2) Projektgrundlage + erste Tests (6 P.)
-- Das Starterprojekt liegt bereits unter `src/`.  
-- **Aufgabe:** Schreibe **mindestens zwei zusätzliche Unit-Test** in `src/test/java` (z. B. weitere Fälle für `Calculator` oder `TextUtils`).  
-- Stelle sicher, dass die Tests **lokal ausführbar** sind (`mvn test` oder Test-Explorer).
+# Demo 3 — Extend workflow to “Build & Test (Java/Maven)”
 
----
+**Goal:** Checkout + Java 17 + Maven tests in CI.
 
-### (3) Branching (6 P.)
-- Erstelle einen Branch **`feature/about-me`**.  
-- Lege eine Datei **`about-me.md`** im Projektroot an **mit folgendem Inhalt**:
-  - **Name**
-  - **Studiengang**
-  - **Erwartungen** an die LV (kurz)
-  - **3 Fakten** über dich
-  - Ein kurzer Satz: **„Warum ist CI/CD für mich relevant?“**
-- Commit & Push des Branches.
+**Explanation:**
+- `actions/checkout` pulls repo code.
+- `actions/setup-java` installs **Temurin 17** (free OpenJDK Distribution) and enables Maven cache.
+- `mvn test` runs Surefire (unit tests).
+- needs: awaits finishing another job
 
----
+### Copy block (YAML)
+```yaml
+# .github/workflows/ci.yml
+name: CI
+on: [push, pull_request]
 
-### (4) PR-Workflow & Reviews (6 P.)
-- Erstelle auf GitHub einen **Pull Request** von `feature/about-me` auf `main` mit *sinnvoller Beschreibung*.  
-- **Team-Review** (2–3er Teams, je eigenes Repo): mind. **1 Kommentar**.  
-- Adressiere das Feedback und **merge** den PR.
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello, CI!"
+  
+  build-test:
+    needs: hello
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
----
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: maven
 
-### (5) Dokumentation (2 P.)
-- Ergänze die `README.md` im Main-Branch um den Abschnitt:
-  ```markdown
-  ## Übung 1
-  - Autor: <dein Name>
-  - Besonderheit: <1–2 Sätze zu deiner bisherigen Git-Erfahrung>
-  ```
-- Reiche den **Repo-Link** in eLearning bis **14.10.2025, 23:55** ein.
-
----
-
-## Bewertung (Rubrik, 24 Punkte)
-
-| Teilaufgabe | Beschreibung | Punkte |
-|---|---|---:|
-| Repo einrichten | Repo + Starterprojekt im eigenen Repo, lokal geklont | 4 |
-| Projektgrundlage & Tests | mindestens **2 zusätzlichen Tests** geschrieben, Tests laufen lokal | 6 |
-| Branching | Branch erstellt, `about-me.md` mit allen geforderten Inhalten | 6 |
-| PR & Review | PR mit Beschreibung, 1 Review-Kommentar, Merge | 6 |
-| Dokumentation | README-Abschnitt „Übung 1“ ergänzt | 2 |
-| **Summe** | | **24** |
-
----
-
-## Konventionen (für alle Übungen)
-- **Branch-Namen:** `feature/<kurz>`, `fix/<issue-id>-<kurz>`
-- **Commit-Messages:** *Conventional Commits* (`feat:`, `fix:`, `docs:`, `test:`, `refactor:` …)
-- **PR-Qualität:** kleine Diffs, klare Beschreibung, mindestens **1 Review-Kommentar**
-- **Issues:** Labels (`bug`, `feat`, `docs`, …), PRs mit Issues verlinken (`Fixes #<nr>`)
-
----
-
-## Sonar-Hinweise (werden in Übung 2 sichtbar)
-- **String-Vergleich mit `==`** in `TextUtils.isPalindrome` (Bug)
-- **Leerer `catch`-Block** + zu generische Exception in `TextUtils.safeParseInt`
-- **Duplizierter Code** in `Calculator.sumUp` / `addAll`
-- **Magic Numbers** (`42`, `3/5/7/13/17`)
-- **`System.out.println`** statt Logger in `App`
-- **öffentliche, nicht finale statische Felder** (`MAX_OPERANDS`, `DEFAULT_LIMIT`)
-- **unbenutztes Feld** in `NumberUtils`
-
----
-
-## Troubleshooting
-
-### A) Quick Checks (alle Plattformen)
-- Projekt-Root geöffnet (Ordner mit `pom.xml`)?  
-- `java -version` und `mvn -v` liefern Versionen?  
-- In `pom.xml` stehen `junit-jupiter-api` **und** `junit-jupiter-engine`; Surefire 3.x aktiv?  
-- Tests lokal grün:
-  ```bash
-  mvn -q -DskipTests=false test
-  ```
-- `git remote -v`: **origin** → eigenes Repo; **upstream** (falls vorhanden) nur zum Lesen.
-
-### B) Windows – Installation & PATH
-- Installieren (PowerShell):
-  ```powershell
-  winget install Git.Git
-  winget install Apache-Maven.Apache-Maven
-  winget install EclipseAdoptium.Temurin.17.JDK
-  java -version
-  mvn -v
-  setx JAVA_HOME "C:\Program Files\Eclipse Adoptium\jdk-17"
-  $env:PATH += ";C:\Program Files\Eclipse Adoptium\jdk-17in"
-  ```
-- VS Code → „**Java: Configure Java Runtime**“ → **JDK 17** wählen.  
-- Lange Pfade: `git config --global core.longpaths true`.
-
-### C) Linux – Installation & PATH
-- Debian/Ubuntu:
-  ```bash
-  sudo apt update && sudo apt install -y openjdk-17-jdk maven git
-  ```
-- Fedora:
-  ```bash
-  sudo dnf install -y java-17-openjdk-devel maven git
-  ```
-- Arch:
-  ```bash
-  sudo pacman -S jdk17-openjdk maven git
-  ```
-- JAVA_HOME/PATH setzen:
-  ```bash
-  java -version && mvn -v
-  echo 'export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))' >> ~/.bashrc
-  echo 'export PATH=$JAVA_HOME/bin:$PATH' >> ~/.bashrc && source ~/.bashrc
-  ```
-
-### D) VS Code – Tests werden nicht erkannt
-- **Extension Pack for Java** installieren (inkl. Test Runner).  
-- Projekt neu laden: „**Java: Clean Java Language Server Workspace**“.  
-- POM prüfen:
-  ```xml
-  <dependency>org.junit.jupiter:junit-jupiter-api:5.10.2</dependency>
-  <dependency>org.junit.jupiter:junit-jupiter-engine:5.10.2</dependency>
-  <plugin>maven-surefire-plugin:3.2.5</plugin>
-  ```
-
-### E) Git & PR – häufige Fehler
-- **HTTPS + 2FA:** statt Passwort **Personal Access Token** verwenden.  
-- **SSH:** Key erstellen & bei GitHub hinterlegen:
-  ```bash
-  ssh-keygen -t ed25519 -C "<deine-mail>"
-  eval "$(ssh-agent -s)" && ssh-add ~/.ssh/id_ed25519
-  cat ~/.ssh/id_ed25519.pub  # Key bei GitHub > Settings > SSH Keys hinzufügen
-  ```
-- **Falscher Push-Remote:**  
-  ```bash
-  git config remote.pushDefault origin
-  ```
-- **PR „Update branch“ / Konflikte:**
-  ```bash
-  git fetch origin
-  git switch feature/about-me
-  git merge origin/main   # oder: git rebase origin/main
-  # Konflikte in VS Code lösen → mvn test → commit → push
-  ```
-- **non-fast-forward beim Push:** `git pull --rebase`, dann `git push`.  
-- **PR blockiert:** Branch-Protection → Approval/Checks (CI) nötig.
-
-### F) Zeilenenden & Encoding
-```bash
-# Windows:
-git config --global core.autocrlf true
-# macOS/Linux:
-git config --global core.autocrlf input
-```
-
-### G) Netzwerk & Proxy
-- Env-Variablen setzen:
-  ```powershell
-  $env:HTTP_PROXY="http://proxy:3128"; $env:HTTPS_PROXY="http://proxy:3128"
-  ```
-  ```bash
-  export HTTP_PROXY=http://proxy:3128
-  export HTTPS_PROXY=http://proxy:3128
-  ```
-- Maven-Proxy in `~/.m2/settings.xml`:
-  ```xml
-  <settings>
-    <proxies>
-      <proxy>
-        <active>true</active>
-        <protocol>http</protocol>
-        <host>proxy</host><port>3128</port>
-      </proxy>
-    </proxies>
-  </settings>
-  ```
-
-### H) Diagnose-Kommandos
-```bash
-java -version    | mvn -v
-git status       | git log --oneline --graph --decorate -10
-git remote -v    | git config --get remote.pushDefault
-git branch -vv   | git rev-parse --abbrev-ref HEAD
-mvn -q -DskipTests=false test
+      - name: Build & Test
+        run: mvn -B -DskipTests=false test
 ```
 
 ---
 
+# Demo 4 — Upload test reports as an artifact
 
-## Ausblick
-- **Übung 2 (22.10.)**: GitHub Actions – Build & Tests automatisiert ausführen; SonarCloud integrieren.
+**Goal:** Make Surefire reports (Maven-Plugin für Unit-Tests) downloadable in Actions.
 
-## Übung 1
-- Autor: Thomas Elias Huber
-- Besonderheit: Herr Huber hat bereits ein paar Erfahrungen mit Git gemacht, vor allem in den Semesterprojekten, doch er möchte sein Wissen erweitern!
+**Explanation:**
+- `if: always()` ensures reports are uploaded even when tests fail.
+- In GitHub Actions → run → **Artifacts** → `surefire-reports`.
+
+### Copy block (YAML addition)
+```yaml
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports
+```
+
+---
+
+# Demo 5 — Path & branch filters
+
+**Goal:** Run CI only for relevant changes (Java/POM) and only on `main`.
+
+**Explanation:**
+- `paths`/`paths-ignore` reduce unnecessary runs (e.g., docs-only changes).
+- Branch filters: CI only for `main`.
+
+### Copy block (YAML)
+```yaml
+on:
+  push:
+    branches: [ main ]
+    paths: [ 'pom.xml', 'src/**' ]
+  pull_request:
+    branches: [ main ]
+    paths: [ 'pom.xml', 'src/**' ]
+```
+
+---
+
+# Demo 6 — Concurrency (cancel duplicate runs)
+
+**Goal:** Auto-cancel older runs for the same branch.
+
+**Explanation:**
+- `concurrency` groups runs by branch/ref.
+- `cancel-in-progress: true` cancels older, still running builds.
+
+### Copy block (YAML)
+```yaml
+# Add at workflow top-level (or job-level):
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+```
+
+---
+
+# Demo 7 — Matrix builds (OS × Java) + artifact naming
+
+**Goal:** Test in parallel across multiple OS/Java versions and name artifacts per variant.
+
+**Explanation:**
+- `strategy.matrix` creates one job per combination.
+- Use `${{ matrix.os }}` / `${{ matrix.java }}` in names/steps.
+- `exclude` removes unneeded combinations.
+
+### Copy block (YAML — full job)
+```yaml
+jobs:
+  hello:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello, CI!"
+
+  build-test:
+    needs: hello
+    name: "Test (${{ matrix.os }} / Java ${{ matrix.java }})"
+    strategy:
+      fail-fast: true
+      matrix:
+        os:   [ubuntu-latest, windows-latest]
+        java: [17, 21]
+        exclude:
+          - os: windows-latest
+            java: 21   # example: skip this combo
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+          cache: maven
+
+      - name: Build & Test
+        run: mvn -B -DskipTests=false test
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-${{ matrix.os }}-java${{ matrix.java }}
+          path: target/surefire-reports
+```
+
+
+---
+
+## Troubleshooting (quick)
+
+- **“No tests found”** — check test class names (`*Test.java`), JUnit deps in `pom.xml`, and that you’re at the project root.
+- **JDK mismatch** — ensure `setup-java` version matches the project (here **17**).
+- **Fork PRs & secrets** — secrets are **not** available to untrusted PRs (by design).
+- **Cache not used** — changed `pom.xml`? Key correct? Consider `restore-keys` fallback.
+- **Slow runs** — enable cache, use path filters, avoid log flooding, use `fail-fast`.
