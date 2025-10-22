@@ -1,11 +1,14 @@
 package com.example.cicd;
 
+import java.util.Locale;
+
 public class TextUtils {
 
     public static boolean isPalindrome(String input) {
         if (input == null) return false;
-        String reversed = new StringBuilder(input).reverse().toString();
-        return input.toLowerCase() == reversed.toLowerCase(); // absichtlich falsch
+        String normalized = input.replaceAll("\\s+", "").toLowerCase(Locale.ROOT);
+        String reversed = new StringBuilder(normalized).reverse().toString();
+        return normalized.equals(reversed);
     }
 
     // Leerer Catch-Block + sehr generische Exception

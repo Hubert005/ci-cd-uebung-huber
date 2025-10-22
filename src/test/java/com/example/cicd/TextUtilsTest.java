@@ -24,4 +24,14 @@ class TextUtilsTest {
     void isPalindrome_caseInsensitive_expectedTrue() {
         assertTrue(TextUtils.isPalindrome("Anna"));
     }
+
+    @Test
+    void palindrome_ignoresSpacesAndCase() {
+        assertTrue(TextUtils.isPalindrome("Never Odd Or Even"));
+    }
+
+    @Test
+    void palindrome_nonPalindromeIsFalse() {
+        assertFalse(TextUtils.isPalindrome("Hello"));
+    }
 }

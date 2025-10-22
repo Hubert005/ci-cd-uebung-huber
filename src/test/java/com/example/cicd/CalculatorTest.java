@@ -33,4 +33,16 @@ class CalculatorTest {
         List<Integer> nums = Arrays.asList(1, 2, 3, null, 4);
         assertEquals(c.sumUp(nums), c.addAll(nums));
     }
+
+    @Test
+    void add_handlesNegatives() {
+        Calculator c = new Calculator();
+        assertEquals(-3, c.add(-5, 2));
+    }
+
+    @Test
+    void add_zeroIsNeutralElement() {
+        Calculator c = new Calculator();
+        assertEquals(123, c.add(123, 0));
+    }
 }
