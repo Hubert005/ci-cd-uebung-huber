@@ -1,3 +1,8 @@
+![CI](https://github.com/<your-username>/<your-repo-name>/actions/workflows/ci.yml/badge.svg)
+
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Hubert005_ci-cd-uebung-huber&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Hubert005_ci-cd-uebung-huber)
+
+
 # CI Demos – GitHub Actions + Java/Maven
 
 This README walks you step by step from a **minimal “Hello CI” workflow** to **matrix builds (OS × Java)**.
