@@ -89,7 +89,7 @@ jobs:
         with:
           args: >
             -Dsonar.projectKey=Hubert005_ci-cd-uebung-huber
-            -Dsonar.organization=Hubert005
+            -Dsonar.organization=hubert005
             -Dsonar.branch.name=main
             -Dsonar.java.binaries=target/classes
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
