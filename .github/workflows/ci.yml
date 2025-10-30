@@ -17,13 +17,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  hello:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Hello, CI!"
 
   build-test:
-    needs: hello
     name: "Test (${{ matrix.os }} / Java ${{ matrix.java }})"
     strategy:
       fail-fast: true
@@ -55,7 +50,7 @@ jobs:
           path: target/surefire-reports
 
   build-test-analyze:
-    name: "Build, Test, Coverage & SonarCloud"
+    name: "Build, Test & Analyze"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -90,4 +85,3 @@ jobs:
         with:
           name: jacoco-site
           path: target/site/jacoco
-          
