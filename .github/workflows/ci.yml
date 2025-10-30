@@ -93,3 +93,4 @@ jobs:
             -Dsonar.branch.name=main
             -Dsonar.java.binaries=target/classes
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            
