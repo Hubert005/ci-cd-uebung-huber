@@ -17,7 +17,6 @@ class CalculatorTest {
     void add_shouldSumTwoIntegers() {
         Calculator c = new Calculator();
         assertEquals(5, c.add(2, 3));
-        // TODO: weitere Grenzfälle (z. B. negative Zahlen)
         assertEquals(5, c.add(7, -2));
     }
 
@@ -33,5 +32,12 @@ class CalculatorTest {
         Calculator c = new Calculator();
         List<Integer> nums = Arrays.asList(1, 2, 3, null, 4);
         assertEquals(c.sumUp(nums), c.addAll(nums));
+    }
+
+    @Test
+    void subtract_shouldSubtractTwoIntegers() {
+        Calculator c = new Calculator();
+        assertEquals(1, c.subtract(3, 2));
+        assertEquals(-9, c.subtract(-7, 2));
     }
 }
