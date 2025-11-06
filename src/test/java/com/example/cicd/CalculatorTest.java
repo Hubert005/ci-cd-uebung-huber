@@ -21,10 +21,18 @@ class CalculatorTest {
     }
 
     @Test
+    void divisionTests() {
+        Calculator c = new Calculator();
+        assertEquals(5, c.divide(10, 2));
+        assertEquals(3, c.divide(9, 3));
+        assertEquals(-4, c.divide(8, -2));
+    }
+
+    @Test
     void divide_byZero_shouldReturnZero_currentBehavior() {
         Calculator c = new Calculator();
-        // Aktuelles (schlechtes) Verhalten absichtlich bestätigt – Refactoring in Ü2
         assertThrows(ArithmeticException.class, () -> c.divide(10, 0));
+        assertThrows(ArithmeticException.class, () -> c.divide(0, 0));
     }
 
     @Test

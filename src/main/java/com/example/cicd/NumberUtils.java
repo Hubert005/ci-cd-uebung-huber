@@ -2,7 +2,9 @@ package com.example.cicd;
 
 public class NumberUtils {
 
-    public static int DEFAULT_LIMIT = 10;
+    private NumberUtils() {}
+
+    public static final int DEFAULT_LIMIT = 10;
 
     // Langer, leicht „unnötig“ komplexer Code mit Magic Numbers
     public static boolean isSpecial(int n) {
