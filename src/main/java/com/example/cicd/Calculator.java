@@ -23,7 +23,7 @@ public class Calculator {
     // (Bug/Code Smell – wird von Sonar i.d.R. markiert)
     public int divide(int a, int b) {
         if (b == 0) {
-            return 0; 
+            throw new ArithmeticException("Divide by zero");
         }
         return a / b; // Integer Division
     }
@@ -40,12 +40,6 @@ public class Calculator {
     }
 
     public int addAll(List<Integer> nums) {
-        int s = 0;
-        for (Integer n : nums) {
-            if (n != null) {
-                s += n;
-            }
-        }
-        return s;
+        return sumUp(nums);
     }
 }

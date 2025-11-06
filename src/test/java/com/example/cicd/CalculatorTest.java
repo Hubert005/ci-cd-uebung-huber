@@ -24,7 +24,7 @@ class CalculatorTest {
     void divide_byZero_shouldReturnZero_currentBehavior() {
         Calculator c = new Calculator();
         // Aktuelles (schlechtes) Verhalten absichtlich bestätigt – Refactoring in Ü2
-        assertEquals(0, c.divide(10, 0));
+        assertThrows(ArithmeticException.class, () -> c.divide(10, 0));
     }
 
     @Test
