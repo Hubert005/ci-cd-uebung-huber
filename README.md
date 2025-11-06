@@ -423,7 +423,7 @@ Workflow setup
 - [x] Matrix covers both OS and both JDKs; one combination is excluded.
 - [x] JaCoCo XML coverage file exists and is referenced by SonarCloud.
 - [x] SonarCloud analysis runs on every push to main; token and project settings OK.
-- [ ] ≥ 2 SonarCloud findings fixed; PDF shows before/after.
+- [X] ≥ 2 SonarCloud findings fixed; PDF shows before/after.
 - [x] README contains the workflow status badge.
 
 Good luck—and keep your new code clean. 🚀
