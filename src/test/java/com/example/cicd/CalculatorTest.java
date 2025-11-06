@@ -18,6 +18,7 @@ class CalculatorTest {
         Calculator c = new Calculator();
         assertEquals(5, c.add(2, 3));
         // TODO: weitere Grenzfälle (z. B. negative Zahlen)
+        assertEquals(5, c.add(7, -2));
     }
 
     @Test
