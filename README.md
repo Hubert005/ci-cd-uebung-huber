@@ -418,12 +418,12 @@ Workflow setup
 - Documentation: in the PDF, include small, legible screenshots and one-sentence explanations—prioritize clarity over volume.
 
 ## Submission checklist (student self-check)
-- [ ] Workflow triggers and concurrency are configured.
-- [ ] Tests run in CI; artifacts exist for each matrix variant and are clearly named.
-- [ ] Matrix covers both OS and both JDKs; one combination is excluded.
-- [ ] JaCoCo XML coverage file exists and is referenced by SonarCloud.
-- [ ] SonarCloud analysis runs on every push to main; token and project settings OK.
+- [x] Workflow triggers and concurrency are configured.
+- [x] Tests run in CI; artifacts exist for each matrix variant and are clearly named.
+- [x] Matrix covers both OS and both JDKs; one combination is excluded.
+- [x] JaCoCo XML coverage file exists and is referenced by SonarCloud.
+- [x] SonarCloud analysis runs on every push to main; token and project settings OK.
 - [ ] ≥ 2 SonarCloud findings fixed; PDF shows before/after.
-- [ ] README contains the workflow status badge.
+- [x] README contains the workflow status badge.
 
 Good luck—and keep your new code clean. 🚀

@@ -1,0 +1,7 @@
+# Maven
+target/
+# IDE/OS
+*.iml
+.idea/
+.vscode/
+.DS_Store
