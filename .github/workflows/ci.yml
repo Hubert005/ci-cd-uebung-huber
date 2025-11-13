@@ -103,7 +103,6 @@ jobs:
       - build-test-analyze
     runs-on: ubuntu-latest
 
-    # Nur auf Push nach main ein Docker-Image bauen
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
