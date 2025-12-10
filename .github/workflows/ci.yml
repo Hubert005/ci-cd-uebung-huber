@@ -97,7 +97,7 @@ jobs:
           path: target/site/jacoco
 
   docker-image:
-    name: "Docker image (single-arch) + artifact"
+    name: "Docker image + security scan"
     needs:
       - build-test
       - build-test-analyze
@@ -139,4 +139,56 @@ jobs:
           path: docker-image-${{ steps.meta.outputs.short_sha }}.tar
           retention-days: 7
 
-          
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y trivy
+
+      - name: Trivy image scan (JSON report)
+        run: |
+          trivy image \
+            --format json \
+            --output trivy-report-${{ steps.meta.outputs.short_sha }}.json \
+            local/java-hello:${{ steps.meta.outputs.short_sha }}
+
+      - name: Upload Trivy JSON report
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-report-${{ steps.meta.outputs.short_sha }}.json
+          path: trivy-report-${{ steps.meta.outputs.short_sha }}.json
+          retention-days: 7
+
+      - name: Install Grype
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh \
+            | sudo sh -s -- -b /usr/local/bin
+
+      - name: Grype image scan (JSON report)
+        run: |
+          grype local/java-hello:${{ steps.meta.outputs.short_sha }} \
+            -o json > grype-report-${{ steps.meta.outputs.short_sha }}.json
+
+      - name: Upload Grype JSON report
+        uses: actions/upload-artifact@v4
+        with:
+          name: grype-report-${{ steps.meta.outputs.short_sha }}.json
+          path: grype-report-${{ steps.meta.outputs.short_sha }}.json
+          retention-days: 7
+
+      - name: Trivy quality gate experiment
+        continue-on-error: true
+        run: |
+          echo "Running Trivy quality gate (HIGH,CRITICAL, exit-code 1, ignore-unfixed)..."
+          trivy image \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --exit-code 1 \
+            local/java-hello:${{ steps.meta.outputs.short_sha }}
+
+      - name: Grype quality gate experiment
+        continue-on-error: true
+        run: |
+          echo "Running Grype quality gate (fail-on=high, only-fixed)..."
+          grype local/java-hello:${{ steps.meta.outputs.short_sha }} \
+            --fail-on high \
+            --only-fixed
