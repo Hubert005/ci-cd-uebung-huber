@@ -62,6 +62,7 @@ jobs:
   build-test-analyze:
     name: "Build, Test & Analyze"
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
@@ -73,7 +74,7 @@ jobs:
 
       - name: Build, Test, Coverage, SonarCloud
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR}}
+          SONAR_TOKEN: ${{ secrets.SONAR }}
         run: |
           mvn -B verify \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
@@ -139,15 +140,14 @@ jobs:
           path: docker-image-${{ steps.meta.outputs.short_sha }}.tar
           retention-days: 7
 
-      - name: Trivy quality gate (HIGH,CRITICAL)
+      - name: Trivy image scan (JSON report)
         uses: aquasecurity/trivy-action@0.33.1
-        continue-on-error: true
         with:
           image-ref: local/java-hello:${{ steps.meta.outputs.short_sha }}
-          format: 'table'
-          severity: 'HIGH,CRITICAL'
-          ignore-unfixed: true
-          exit-code: '1'
+          format: 'json'
+          output: trivy-report-${{ steps.meta.outputs.short_sha }}.json
+          ignore-unfixed: false
+          exit-code: '0'
 
       - name: Upload Trivy JSON report
         uses: actions/upload-artifact@v4
@@ -173,17 +173,17 @@ jobs:
           path: grype-report-${{ steps.meta.outputs.short_sha }}.json
           retention-days: 7
 
-      - name: Trivy quality gate experiment
+      - name: Trivy quality gate (HIGH,CRITICAL, ignore-unfixed)
+        uses: aquasecurity/trivy-action@0.33.1
         continue-on-error: true
-        run: |
-          echo "Running Trivy quality gate (HIGH,CRITICAL, exit-code 1, ignore-unfixed)..."
-          trivy image \
-            --severity HIGH,CRITICAL \
-            --ignore-unfixed \
-            --exit-code 1 \
-            local/java-hello:${{ steps.meta.outputs.short_sha }}
+        with:
+          image-ref: local/java-hello:${{ steps.meta.outputs.short_sha }}
+          format: 'table'
+          severity: 'HIGH,CRITICAL'
+          ignore-unfixed: true
+          exit-code: '1'   
 
-      - name: Grype quality gate experiment
+      - name: Grype quality gate (fail-on=high, only-fixed)
         continue-on-error: true
         run: |
           echo "Running Grype quality gate (fail-on=high, only-fixed)..."
