@@ -139,20 +139,16 @@ jobs:
           path: docker-image-${{ steps.meta.outputs.short_sha }}.tar
           retention-days: 7
 
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_Linux-64bit.tar.gz
-          tar zxvf trivy_Linux-64bit.tar.gz
-          sudo mv trivy /usr/local/bin/trivy
-
       - name: Trivy image scan (JSON report)
-        run: |
-          trivy image \
-            --format json \
-            --output trivy-report-${{ steps.meta.outputs.short_sha }}.json \
-            local/java-hello:${{ steps.meta.outputs.short_sha }}
+        uses: aquasecurity/trivy-action@v0
+        with:
+          image-ref: local/java-hello:${{ steps.meta.outputs.short_sha }}
+          format: 'json'
+          output: trivy-report-${{ steps.meta.outputs.short_sha }}.json
+          ignore-unfixed: true
+          severity: 'HIGH,CRITICAL'
+          exit-code: '0'
+
 
       - name: Upload Trivy JSON report
         uses: actions/upload-artifact@v4
